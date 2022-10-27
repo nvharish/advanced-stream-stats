@@ -1,0 +1,21 @@
+name: Deployment
+
+on:
+  push:
+    branches: [ main ]
+    
+jobs:
+  Deploy-to-Server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Sync Files
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            chmod +x ./public_html/api/v1/.scripts/deploy.sh
+            ./public_html/api/v1/.scripts/deploy.sh
