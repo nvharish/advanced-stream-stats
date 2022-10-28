@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class Authenticate
 {
@@ -33,12 +34,25 @@ class Authenticate
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
-    {
-        if ($this->auth->guard($guard)->guest()) {
-            return response('Unauthorized.', 401);
+    public function handle($request, Closure $next, ...$guards) {
+        $guards = empty($guards) ? [null] : $guards;
+        $is_guest = true;
+
+        foreach ($guards as $guard) {
+            if (!$this->auth->guard($guard)->guest()) {
+                $this->auth->shouldUse($guard);
+                $is_guest = false;
+                break;
+            }
         }
 
+        if ($is_guest) {
+            $status = Response::HTTP_UNAUTHORIZED;
+            return response()->json([
+                        'status' => 'ERROR',
+                        'message' => Response::$statusTexts[$status]
+                            ], $status);
+        }
         return $next($request);
     }
 }

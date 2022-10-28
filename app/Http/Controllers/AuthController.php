@@ -24,12 +24,6 @@ class AuthController extends Controller {
                 'destroyToken',
             ]
         ]);
-
-        $this->middleware('auth:fe_client', [
-            'only' => [
-                'createToken',
-            ]
-        ]);
     }
 
     public function createToken(Request $request) {

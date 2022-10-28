@@ -8,6 +8,9 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Database\QueryException;
+use DomainException;
 
 class Handler extends ExceptionHandler
 {

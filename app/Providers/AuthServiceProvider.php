@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Models\User;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Auth;
+use App\Guards\AccessTokenGuard;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -30,10 +30,12 @@ class AuthServiceProvider extends ServiceProvider
         // should return either a User instance or null. You're free to obtain
         // the User instance via an API token or any other method necessary.
 
-        $this->app['auth']->viaRequest('api', function ($request) {
-            if ($request->input('api_token')) {
-                return User::where('api_token', $request->input('api_token'))->first();
-            }
+        Auth::provider('jwt', function ($app, array $config) {
+            return new AccessTokenProvider($app->make($config['model']));
+        });
+
+        Auth::extend('access_token', function ($app, $name, array $config) {
+            return new AccessTokenGuard(Auth::createUserProvider($config['provider']), request());
         });
     }
 }
