@@ -49,6 +49,27 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        return parent::render($request, $exception);
+        if ($exception instanceof HttpException) {
+            $status_code = $exception->getStatusCode();
+        } elseif ($exception instanceof ValidationException) {
+            $status_code = $exception->getResponse()->getStatusCode();
+            $errors = $exception->errors();
+        } elseif ($exception instanceof DomainException || $exception instanceof SignatureInvalidException) {
+            $status_code = Response::HTTP_UNAUTHORIZED;
+            $errors = $exception->getMessage();
+        } elseif ($exception instanceof QueryException) {
+            $status_code = Response::HTTP_BAD_REQUEST;
+        } else {
+            $status_code = Response::HTTP_INTERNAL_SERVER_ERROR;
+        }
+
+        $response = array(
+            'status' => 'ERROR',
+            'message' => Response::$statusTexts[$status_code] ?? 'Something went wrong',
+        );
+        if (!empty($errors)) {
+            $response['errors'] = $errors;
+        }
+        return response()->json($response, $status_code);
     }
 }
