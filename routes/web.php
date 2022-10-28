@@ -16,3 +16,6 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->post('/auth/token', 'AuthController@createToken');
+$router->delete('/auth/token', 'AuthController@destroyToken');
