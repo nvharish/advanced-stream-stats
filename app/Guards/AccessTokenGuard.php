@@ -41,7 +41,7 @@ class AccessTokenGuard implements Guard {
         }
         $key = env('APP_KEY');
         $jwt = $this->request->bearerToken();
-
+        $validated = false;
         try {
             if (!is_null($jwt)) {
                 $payload = JWT::decode($jwt, new Key($key, env('JWT_ALG')));

@@ -19,3 +19,6 @@ $router->get('/', function () use ($router) {
 
 $router->post('/auth/token', 'AuthController@createToken');
 $router->delete('/auth/token', 'AuthController@destroyToken');
+$router->post('/subscription/purchase', 'SubscriptionController@purchase');
+$router->get('/subscription/retrieve', 'SubscriptionController@retrieve');
+$router->post('/subscription/authorize', 'SubscriptionController@authorizePayment');
