@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\PaymentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class SubscriptionController extends Controller {
 
@@ -35,7 +36,12 @@ class SubscriptionController extends Controller {
     public function authorizePayment(Request $request) {
         $params = $request->all();
         $result = $this->payment_service->authorizePayment($params);
-        $response = $this->generateResponse($result);
+        if ($result['success']) {
+            $response = $this->generateResponse($result);
+        } else {
+            $response = $this->generateResponse($result, Response::HTTP_UNAUTHORIZED);
+        }
+
         return $response;
     }
 

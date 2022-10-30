@@ -32,12 +32,6 @@ class PaymentService {
         $params['payment_method_nonce'] = $args['payment_method_nonce'];
         //print_r($params);exit;
         $result = $this->braintree_wrapper->doPayment($params);
-        if ($result['success']) {
-            //save in DB
-            $result = array(
-                'message' => 'Subscription purchased'
-            );
-        }
         return $result;
     }
 

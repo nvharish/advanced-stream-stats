@@ -56,25 +56,32 @@ class BrainTree {
 
     private function proceedToPay($customer_id, $args = array()) {
         $transaction = array();
-        $charge = Transaction::sale([
-                    'customerId' => $customer_id,
-                    'amount' => $args['price'],
-                    'options' => [
-                        'submitForSettlement' => true,
-                        'threeDSecure' => [
-                            "required" => false
+        try {
+            $charge = Transaction::sale([
+                        'customerId' => $customer_id,
+                        'amount' => $args['price'],
+                        'options' => [
+                            'submitForSettlement' => true,
+                            'threeDSecure' => [
+                                "required" => false
+                            ]
                         ]
-                    ]
-        ]);
-        if ($charge->success) {
-            $transaction['success'] = true;
-            $transaction['transaction_id'] = $charge->transaction->id;
-            $transaction['transaction_amount'] = $charge->transaction->amount;
-        } else {
+            ]);
+            if ($charge->success) {
+                $transaction['success'] = true;
+                $transaction['transaction_id'] = $charge->transaction->id;
+                $transaction['transaction_amount'] = $charge->transaction->amount;
+            } else {
+                $transaction['success'] = false;
+            }
+            $transaction['transaction_status'] = $charge->transaction->status;
+            $transaction['response_text'] = serialize($charge);
+        } catch (Exception $ex) {
             $transaction['success'] = false;
+            $transaction['transaction_status'] = 'Something went wrong';
+            $transaction['response_text'] = serialize($charge);
         }
-        $transaction['transaction_status'] = $charge->transaction->status;
-        $transaction['response_text'] = serialize($charge);
+
         return $transaction;
     }
 
