@@ -5,6 +5,8 @@ namespace App\GatewayWrappers;
 use Braintree\Customer;
 use Braintree\ClientToken;
 use Braintree\Configuration;
+use Braintree\Exception;
+use Braintree\Transaction;
 
 class BrainTree {
 
@@ -21,7 +23,28 @@ class BrainTree {
     }
 
     public function doPayment($args = array()) {
-        
+        $result = array();
+        try {
+            $customer = Customer::create([
+                        'email' => $args['email'],
+                        'firstName' => $args['first_name'],
+                        'lastName' => $args['last_name'],
+                        'paymentMethodNonce' => $args['payment_method_nonce']
+            ]);
+
+            if ($customer->success) {
+                $result=$this->proceedToPay($customer->customer->id);
+            } else {
+                $result['success'] = false;
+                $result['transaction_status'] = 'Something went wrong';
+                $result['response_text'] = serialize($customer);
+            }
+        } catch (Exception $ex) {
+            $result['success'] = false;
+            $result['transaction_status'] = 'Something went wrong';
+            $result['response_text'] = serialize($customer);
+        }
+        return $result;
     }
 
     public function authorizePayment($args = array()) {
@@ -31,17 +54,28 @@ class BrainTree {
         );
     }
 
-    private function createCustomer($args = array()) {
-        Customer::create([
-            'email' => $args['email'],
-            'creditCard' => [
-                'cardholderName' => $args['card_holder_name'],
-                'cvv' => $args['cvv'],
-                'expirationMonth' => $args['exp_month'],
-                'expirationYear' => $args['exp_year'],
-                'number' => $args['card_number']
-            ]
+    private function proceedToPay($customer_id, $args = array()) {
+        $transaction=array();
+        $charge = Transaction::sale([
+                    'customerId' => $customer_id,
+                    'amount' => $args['price'],
+                    'options' => [
+                        'submitForSettlement' => true,
+                        'threeDSecure' => [
+                            "required" => false
+                        ]
+                    ]
         ]);
+        if ($charge->success) {
+            $transaction['success'] = true;            
+            $transaction['transaction_id'] = $charge->transaction->id;
+            $transaction['transaction_amount'] = $charge->transaction->amount;            
+        } else {
+            $transaction['success'] = false;
+        }
+        $transaction['transaction_status'] = $charge->transaction->status;
+        $transaction['response_text'] = serialize($charge);
+        return $transaction;
     }
 
 }

@@ -25,12 +25,21 @@ class PaymentService {
     }
 
     public function purchaseSubscription($args = array()) {
-        $args['email'] = 'admin_harrysoftechhub.com@yopmail.com';
-        $this->braintree_wrapper->doPayment($args);
+        $params = self::SUBSCRIPTION_PLANS[$args['plan_code']];
+        $params['email'] = 'admin_harrysoftechhub.com@yopmail.com';
+        $params['payment_method_nonce'] = $args['payment_method_nonce'];
+        $result = $this->braintree_wrapper->doPayment($params);
+        if ($result['success']) {
+            //save in DB
+            $result = array(
+                'message' => 'Subscription purchased'
+            );
+        }
+        return $result;
     }
 
     public function authorizePayment($args = array()) {
-        $result= $this->braintree_wrapper->authorizePayment($args);
+        $result = $this->braintree_wrapper->authorizePayment($args);
         return $result;
     }
 

@@ -23,11 +23,7 @@ class SubscriptionController extends Controller {
     public function purchase(Request $request) {
         $this->validate($request, array(
             'plan_code' => 'required|in:silver,gold',
-            'card_holder_name' => 'required',
-            'card_number' => 'required',
-            'exp_month' => 'required',
-            'exp_year' => 'required',
-            'cvv' => 'required',
+            'payment_method_nonce' => 'required'
         ));
         $plan_card_info = $request->all();
         //print_r($plan_card_info);exit;
