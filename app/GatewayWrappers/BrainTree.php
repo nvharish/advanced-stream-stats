@@ -50,6 +50,7 @@ class BrainTree {
     public function authorizePayment($args = array()) {
         $client_token = ClientToken::generate($args);
         return array(
+            'success' => true,
             'client_token' => $client_token
         );
     }

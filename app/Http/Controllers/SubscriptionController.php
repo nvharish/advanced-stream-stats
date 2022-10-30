@@ -34,8 +34,8 @@ class SubscriptionController extends Controller {
     }
 
     public function authorizePayment(Request $request) {
-        $params = $request->all();
-        $result = $this->payment_service->authorizePayment($params);
+        //$params = $request->all();
+        $result = $this->payment_service->authorizePayment();
         if ($result['success']) {
             $response = $this->generateResponse($result);
         } else {
