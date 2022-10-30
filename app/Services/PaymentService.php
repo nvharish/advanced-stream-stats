@@ -27,7 +27,10 @@ class PaymentService {
     public function purchaseSubscription($args = array()) {
         $params = self::SUBSCRIPTION_PLANS[$args['plan_code']];
         $params['email'] = 'admin_harrysoftechhub.com@yopmail.com';
+        $params['first_name'] = 'Admin';
+        $params['last_name'] = 'HarrySoftechHub';
         $params['payment_method_nonce'] = $args['payment_method_nonce'];
+        //print_r($params);exit;
         $result = $this->braintree_wrapper->doPayment($params);
         if ($result['success']) {
             //save in DB

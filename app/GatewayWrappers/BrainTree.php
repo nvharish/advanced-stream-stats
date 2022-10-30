@@ -33,7 +33,7 @@ class BrainTree {
             ]);
 
             if ($customer->success) {
-                $result=$this->proceedToPay($customer->customer->id);
+                $result = $this->proceedToPay($customer->customer->id, $args);
             } else {
                 $result['success'] = false;
                 $result['transaction_status'] = 'Something went wrong';
@@ -55,7 +55,7 @@ class BrainTree {
     }
 
     private function proceedToPay($customer_id, $args = array()) {
-        $transaction=array();
+        $transaction = array();
         $charge = Transaction::sale([
                     'customerId' => $customer_id,
                     'amount' => $args['price'],
@@ -67,9 +67,9 @@ class BrainTree {
                     ]
         ]);
         if ($charge->success) {
-            $transaction['success'] = true;            
+            $transaction['success'] = true;
             $transaction['transaction_id'] = $charge->transaction->id;
-            $transaction['transaction_amount'] = $charge->transaction->amount;            
+            $transaction['transaction_amount'] = $charge->transaction->amount;
         } else {
             $transaction['success'] = false;
         }
