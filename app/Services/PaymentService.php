@@ -30,8 +30,14 @@ class PaymentService {
         $params['first_name'] = 'Admin';
         $params['last_name'] = 'HarrySoftechHub';
         $params['payment_method_nonce'] = $args['payment_method_nonce'];
+        $params['orderId'] = $args['orderId'];
         //print_r($params);exit;
-        $result = $this->braintree_wrapper->doPayment($params);
+        if ($args['is_paypal']) {
+            $result = $this->braintree_wrapper->doPayPalPayment($params);
+        } else {
+            $result = $this->braintree_wrapper->doPayment($params);
+        }
+
         return $result;
     }
 

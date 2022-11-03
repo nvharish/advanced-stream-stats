@@ -25,13 +25,16 @@ class BrainTree {
     public function doPayment($args = array()) {
         $result = array();
         try {
-            $customer = Customer::create([
-                        'email' => $args['email'],
-                        'firstName' => $args['first_name'],
-                        'lastName' => $args['last_name'],
-                        'paymentMethodNonce' => $args['payment_method_nonce']
-            ]);
-
+            if (isset($args['customer_id']) && !empty($args['customer_id'])) {
+                //create new payment method                
+            } else {
+                $customer = Customer::create([
+                            'email' => $args['email'],
+                            'firstName' => $args['first_name'],
+                            'lastName' => $args['last_name'],
+                            'paymentMethodNonce' => $args['payment_method_nonce']
+                ]);
+            }
             if ($customer->success) {
                 $result = $this->proceedToPay($customer->customer->id, $args);
             } else {
@@ -77,6 +80,38 @@ class BrainTree {
             }
             $transaction['transaction_status'] = $charge->transaction->status;
             $transaction['response_text'] = serialize($charge);
+        } catch (Exception $ex) {
+            $transaction['success'] = false;
+            $transaction['transaction_status'] = 'Something went wrong';
+            $transaction['response_text'] = serialize($charge);
+        }
+
+        return $transaction;
+    }
+
+    public function doPayPalPayment($args = array()) {
+        $transaction = array();
+        try {
+            $result = Transaction::sale([
+                'amount' => $args['price'],
+                'paymentMethodNonce' => $args['payment_method_nonce'],
+                //'deviceData' => $args['device_data'],
+                'orderId' => $args["orderId"],
+                'options' => [
+                    'submitForSettlement' => true,
+                    'paypal' => [
+                        'customField' => "PayPal custom field",
+                        'description' => "Description for PayPal email receipt",
+                    ],
+                    'storeInVaultOnSuccess' => true
+                ],
+            ]);
+            print_r($result);exit;
+            if ($result->success) {
+                print_r("Success ID: " . $result->transaction->id);
+            } else {
+                print_r("Error Message: " . $result->message);
+            }
         } catch (Exception $ex) {
             $transaction['success'] = false;
             $transaction['transaction_status'] = 'Something went wrong';
