@@ -20,20 +20,8 @@ class SubscriptionController extends Controller {
 
         $this->middleware('auth:user');
     }
-
-    public function purchase(Request $request) {
-        $this->validate($request, array(
-            'plan_code' => 'required|in:silver,gold',
-            'payment_method_nonce' => 'required'
-        ));
-        $plan_card_info = $request->all();
-        //print_r($plan_card_info);exit;
-        $result = $this->payment_service->purchaseSubscription($plan_card_info);
-        $response = $this->generateResponse($result);
-        return $response;
-    }
-
-    public function authorizePayment(Request $request) {
+    
+    public function authorizePayment() {
         //$params = $request->all();
         $result = $this->payment_service->authorizePayment();
         if ($result['success']) {
@@ -44,5 +32,19 @@ class SubscriptionController extends Controller {
 
         return $response;
     }
+
+    public function purchase(Request $request) {
+        $this->validate($request, array(
+            'plan_code' => 'required|in:silver,gold',
+            'payment_method_nonce' => 'required'
+        ));
+        $params = $request->all();
+        //print_r($params);exit;
+        $result = $this->payment_service->purchaseSubscription($params);
+        $response = $this->generateResponse($result);
+        return $response;
+    }
+
+    
 
 }
