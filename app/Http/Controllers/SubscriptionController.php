@@ -20,12 +20,12 @@ class SubscriptionController extends Controller {
 
         $this->middleware('auth:user');
     }
-    
+
     public function authorizePayment() {
         //$params = $request->all();
         $result = $this->payment_service->authorizePayment();
-        if ($result['success']) {
-            $response = $this->generateResponse($result);
+        if (!empty($result)) {
+            $response = $this->generateResponse(['client_token' => $result]);
         } else {
             $response = $this->generateResponse($result, Response::HTTP_UNAUTHORIZED);
         }
@@ -44,7 +44,5 @@ class SubscriptionController extends Controller {
         $response = $this->generateResponse($result);
         return $response;
     }
-
-    
 
 }
