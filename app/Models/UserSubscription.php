@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class UserSubscription extends Model {
 
@@ -18,8 +19,9 @@ class UserSubscription extends Model {
         'plan_code',
         'amount',
         'currency',
-        'start_date',
-        'end_date',
+        'start_at',
+        'end_at',
+        'payment_method_id'
     ];
 
     /**
@@ -30,10 +32,6 @@ class UserSubscription extends Model {
     protected $hidden = [
     ];
 
-    public function userPaymentMethod() {
-        return $this->belongsTo(UserSubscription::class);
-    }
-
     public function user() {
         return $this->belongsTo(User::class);
     }
@@ -41,15 +39,20 @@ class UserSubscription extends Model {
     public static function saveUserSubscription($user_subscription = array(), $transaction = array()) {
         try {
             DB::beginTransaction();
-            $payment_method = UserPaymentMethod::createOrUpdate([
-                        'customer_id' => $transaction->customer->id,
-                        'payment_method_name' => $transaction->creditCard->token,
-                        'payment_method_mask' => isset($transaction->creditCardDetails->maskedNumber) ? $transaction->creditCardDetails->maskedNumber : '',
-            ]);
-            $user_subscription['payment_method_id'] = $payment_method->id;
-            $user_sub = UserSubscription::createOrUpdate($user_subscription);
+            if ($transaction['save_payment_method']) {
+                $payment_method = UserPaymentMethod::create([
+                            'user_id' => $transaction['user_id'],
+                            'customer_id' => $transaction['gateway_response']->customerDetails->id,
+                            'payment_method_token' => (isset($transaction['paypal']) && $transaction['paypal']) ? $transaction['gateway_response']->paypalDetails->implicitlyVaultedPaymentMethodToken : $transaction['gateway_response']->creditCardDetails->token,
+                            'payment_method_mask' => isset($transaction['gateway_response']->creditCardDetails->maskedNumber) ? $transaction['gateway_response']->creditCardDetails->maskedNumber : '',
+                ]);
+                $user_subscription['payment_method_id'] = $payment_method->id;
+            }
+            //print_r($user_subscription);exit;
+            $user_sub = UserSubscription::create($user_subscription);
             $transaction['user_subscription_id'] = $user_sub->id;
-            Transaction::create($transaction);
+            $transaction['gateway_response'] = serialize($transaction['gateway_response']);
+            UserTransaction::create($transaction);
             DB::commit();
         } catch (QueryException $ex) {
             DB::rollBack();
@@ -57,9 +60,9 @@ class UserSubscription extends Model {
         }
     }
 
-    public static function cancelUserSubscription($subscription_id) {
+    public static function cancelUserSubscription($user_id) {
         try {
-            $user_subscription = UserSubscription::find($subscription_id);
+            $user_subscription = UserSubscription::where('user_id', $user_id)->first();
             if (!is_null($user_subscription)) {
                 $user_subscription->is_active = false;
                 $user_subscription->cancel_date = gmdate(env('DATETIME_FORMAT'));
@@ -68,6 +71,15 @@ class UserSubscription extends Model {
         } catch (Exception $ex) {
             throw new Exception($ex->getMessage(), $ex->getCode());
         }
+    }
+
+    public static function getActiveSubscription($user_id) {
+        $subscription = UserSubscription::where('user_id', $user_id)
+                        ->where(function ($q) {
+                            $q->where('is_active', true);
+                            $q->orWhere('end_at', '>=', gmdate(env('DATETIME_FORMAT')));
+                        })->first()->toArray();
+        return $subscription;
     }
 
 }

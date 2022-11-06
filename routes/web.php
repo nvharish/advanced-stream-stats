@@ -22,3 +22,5 @@ $router->delete('/auth/token', 'AuthController@destroyToken');
 $router->post('/subscription/purchase', 'SubscriptionController@purchase');
 $router->get('/subscription/retrieve', 'SubscriptionController@retrieve');
 $router->post('/subscription/authorize', 'SubscriptionController@authorizePayment');
+$router->post('/subscription/cancel', 'SubscriptionController@cancel');
+$router->post('/subscription/renew', 'SubscriptionController@renew');

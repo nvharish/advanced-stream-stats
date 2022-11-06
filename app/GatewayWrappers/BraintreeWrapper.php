@@ -55,12 +55,10 @@ class BraintreeWrapper {
                 ];
             }
 
-            if (isset($args['paypal']) && !empty($args['paypal'])) {
-                $params['deviceData'] = $args['device_data'];
-                $params['orderId'] = $args["orderId"];
+            if (isset($args['paypal']) && $args['paypal']) {
+                $params['orderId'] = $args["order_id"];
                 $params['options']['paypal'] = array(
-                    //'customField' => "PayPal custom field",
-                    'description' => $args['description'],
+                    'description' => $args['plan_code'] . $args['amount'],
                 );
             }
 
@@ -80,7 +78,7 @@ class BraintreeWrapper {
             $result['success'] = $transaction_result->success;
             $result['transaction_reference'] = $transaction_result->transaction->id;
             $result['amount'] = $transaction_result->transaction->amount;
-            $result['gateway_response'] = serialize($transaction_result->transaction);
+            $result['gateway_response'] = $transaction_result->transaction;
         } catch (Exception $ex) {
             throw new Exception($ex->getMessage(), $ex->getCode());
         }

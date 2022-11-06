@@ -18,7 +18,8 @@ class UserTransaction extends Model {
         'amount',
         'currency',
         'gateway_response',
-        'user_subscription_id'
+        'user_subscription_id',
+        'transaction_reference',
     ];
 
     /**

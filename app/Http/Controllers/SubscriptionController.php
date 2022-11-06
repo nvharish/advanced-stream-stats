@@ -45,4 +45,12 @@ class SubscriptionController extends Controller {
         return $response;
     }
 
+    public function cancel() {
+        $this->payment_service->cancelSubscription();
+    }
+
+    public function renew() {
+        $this->payment_service->renewSubscriptions();
+    }
+
 }

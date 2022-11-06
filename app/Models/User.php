@@ -126,6 +126,8 @@ class User extends Model implements AuthenticatableContract {
         $payload['refresh_token'] = Service::generateRandomString(self::REFRESH_TOKEN_LENGTH);
         $payload['refresh_token_expire_at'] = Service::currentDateTime(env('DATETIME_FORMAT'), env('REFRESH_TOKEN_EXPIRE_INTERVAL'));
         $payload['user'] = $this->withoutRelations()->toArray();
+        $payload['subscription'] = UserSubscription::getActiveSubscription($payload['user']['id']);
+        $payload['payment_methods'] = UserPaymentMethod::getUserPaymentMethods($payload['user']['id']);
 
         if (!is_null($this->accessToken) && (Service::secondsBetween($this->accessToken->expire_at) - env('REFRESH_TIMEOUT_SECONDS')) > 0) {
             $payload['issued_at'] = $this->accessToken->issued_at;
