@@ -78,7 +78,7 @@ class UserSubscription extends Model {
                         ->where(function ($q) {
                             $q->where('is_active', true);
                             $q->orWhere('end_at', '>=', gmdate(env('DATETIME_FORMAT')));
-                        })->first()->toArray();
+                        })->first();
         return $subscription;
     }
 

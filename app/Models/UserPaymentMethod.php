@@ -34,7 +34,7 @@ class UserPaymentMethod extends Model {
     }
     
     public static function getUserPaymentMethods($user_id) {
-        return UserPaymentMethod::where('user_id', $user_id)->get()->toArray();
+        return UserPaymentMethod::where('user_id', $user_id)->get();
     }
 
 }
