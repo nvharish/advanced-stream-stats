@@ -18,7 +18,10 @@ class SubscriptionController extends Controller {
     public function __construct(PaymentService $payment_service) {
         $this->payment_service = $payment_service;
 
-        $this->middleware('auth:user');
+        $this->middleware('auth:user', [
+            'except' => [
+                'renew',
+        ]]);
     }
 
     public function authorizePayment() {
