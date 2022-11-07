@@ -74,11 +74,11 @@ class BraintreeWrapper {
                 $params['customerId'] = $args['customer_id'];
             }
             $transaction_result = Transaction::sale($params);
-            //print_r($transaction_result);exit;
             $result['success'] = $transaction_result->success;
-            $result['transaction_reference'] = $transaction_result->transaction->id;
-            $result['amount'] = $transaction_result->transaction->amount;
+            $result['transaction_reference'] = $transaction_result->transaction->id ?? '';
+            $result['amount'] = $transaction_result->transaction->amount ?? $args['amount'];
             $result['gateway_response'] = $transaction_result->transaction;
+            $result['message'] = $transaction_result->transaction->message ?? '';
         } catch (Exception $ex) {
             throw new Exception($ex->getMessage(), $ex->getCode());
         }
